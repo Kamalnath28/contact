@@ -32,6 +32,7 @@ def add_contact():
 
         return redirect('/')
 
+
     return render_template("add.html")
 
 
