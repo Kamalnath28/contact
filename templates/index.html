@@ -1,46 +1,123 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Contact List</title>
+    <title>Contact Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-10">
 
-    <div class="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-6">
-        <h2 class="text-2xl font-bold mb-4">Contact List</h2>
+<body class="bg-gray-100 flex">
+
+<!-- Sidebar -->
+<div class="w-64 bg-blue-900 text-white min-h-screen p-5">
+    <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
+
+    <ul class="space-y-4">
+
+        <!-- Contacts Page -->
+        <li>
+            <a href="/" class="block hover:text-gray-300">
+                Contacts
+            </a>
+        </li>
+
+        <!-- Excel Download -->
+        <li>
+            <a href="/export" class="block hover:text-gray-300">
+                Forms (Download Excel)
+            </a>
+        </li>
+
+    </ul>
+</div>
+
+<!-- Main Content -->
+<div class="flex-1 p-8">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">Contact Management</h1>
 
         <a href="/add"
-           class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-           Add Contact
+           class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+           + Add Contact
         </a>
+    </div>
 
-        <table class="w-full mt-4 border-collapse">
+    <!-- White Card -->
+    <div class="bg-white shadow-lg rounded-lg p-6">
+
+        <!-- Search -->
+        <form method="GET" class="mb-4 flex gap-2">
+            <input type="text" name="search"
+                   placeholder="Search by name, email or phone"
+                   class="border p-2 rounded w-1/3">
+
+            <button type="submit"
+                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Search
+            </button>
+        </form>
+
+        <!-- Table -->
+        <table class="w-full border-collapse">
             <thead>
                 <tr class="bg-gray-200">
-                    <th class="p-2 border">Name</th>
-                    <th class="p-2 border">Email</th>
-                    <th class="p-2 border">Phone</th>
+                    <th class="p-3 border">Name</th>
+                    <th class="p-3 border">Email</th>
+                    <th class="p-3 border">Phone</th>
+                    <th class="p-3 border">Actions</th>
                 </tr>
             </thead>
+
             <tbody>
                 {% if contacts %}
                     {% for contact in contacts %}
-                    <tr class="text-center">
-                        <td class="p-2 border">{{ contact.name }}</td>
-                        <td class="p-2 border">{{ contact.email }}</td>
-                        <td class="p-2 border">{{ contact.phone }}</td>
+                    <tr class="text-center hover:bg-gray-100">
+
+                        <td class="p-3 border">
+                            {{ contact.name }}
+                        </td>
+
+                        <td class="p-3 border">
+                            {{ contact.email }}
+                        </td>
+
+                        <td class="p-3 border">
+                            {{ contact.phone }}
+                        </td>
+
+                        <td class="p-3 border space-x-2">
+
+                            <!-- Edit -->
+                            <a href="/edit/{{ contact._id }}"
+                               class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+                               Edit
+                            </a>
+
+                            <!-- Delete -->
+                            <a href="/delete/{{ contact._id }}"
+                               onclick="return confirm('Are you sure you want to delete this contact?')"
+                               class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                               Delete
+                            </a>
+
+                        </td>
+
                     </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="3" class="p-4 text-center text-gray-500">
+                        <td colspan="4" class="p-4 text-center text-gray-500">
                             No contacts found.
                         </td>
                     </tr>
                 {% endif %}
             </tbody>
         </table>
+
     </div>
+
+</div>
 
 </body>
 </html>
