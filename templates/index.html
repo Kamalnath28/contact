@@ -12,21 +12,12 @@
     <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
 
     <ul class="space-y-4">
-
         <!-- Contacts Page -->
         <li>
             <a href="/" class="block hover:text-gray-300">
                 Contacts
             </a>
         </li>
-
-        <!-- Excel Download -->
-        <li>
-            <a href="/export" class="block hover:text-gray-300">
-                Forms (Download Excel)
-            </a>
-        </li>
-
     </ul>
 </div>
 
@@ -47,77 +38,114 @@
     <div class="bg-white shadow-lg rounded-lg p-6">
 
         <!-- Search -->
-        <form method="GET" class="mb-4 flex gap-2">
-            <input type="text" name="search"
+        <form id="searchForm" class="mb-4 flex gap-2" onsubmit="return false;">
+            <input type="text" name="search" id="searchInput"
                    placeholder="Search by name, email or phone"
                    class="border p-2 rounded w-1/3">
 
-            <button type="submit"
-                    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                Search
+            <!-- Refresh Button -->
+            <button type="button" onclick="refreshSearch()"
+                    class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                Refresh
             </button>
         </form>
 
-        <!-- Table -->
-        <table class="w-full border-collapse">
-            <thead>
-                <tr class="bg-gray-200">
-                    <th class="p-3 border">Name</th>
-                    <th class="p-3 border">Email</th>
-                    <th class="p-3 border">Phone</th>
-                    <th class="p-3 border">Actions</th>
-                </tr>
-            </thead>
+        <!-- Show Grid Button -->
+        <div class="mb-4 flex justify-end">
+            <button onclick="toggleGrid()" 
+                    class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700">
+                📊 Show Grid
+            </button>
+        </div>
 
-            <tbody>
-                {% if contacts %}
-                    {% for contact in contacts %}
-                    <tr class="text-center hover:bg-gray-100">
-
-                        <td class="p-3 border">
-                            {{ contact.name }}
-                        </td>
-
-                        <td class="p-3 border">
-                            {{ contact.email }}
-                        </td>
-
-                        <td class="p-3 border">
-                            {{ contact.phone }}
-                        </td>
-
-                        <td class="p-3 border space-x-2">
-
-                            <!-- Edit -->
-                            <a href="/edit/{{ contact._id }}"
-                               class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
-                               Edit
-                            </a>
-
-                            <!-- Delete -->
-                            <a href="/delete/{{ contact._id }}"
-                               onclick="return confirm('Are you sure you want to delete this contact?')"
-                               class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
-                               Delete
-                            </a>
-
-                        </td>
-
+        <!-- Table (Initially Hidden) -->
+        <div id="contactGrid" class="hidden">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-gray-200">
+                        <th class="p-3 border">Name</th>
+                        <th class="p-3 border">Email</th>
+                        <th class="p-3 border">Phone</th>
+                        <th class="p-3 border">Actions</th>
                     </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="4" class="p-4 text-center text-gray-500">
-                            No contacts found.
-                        </td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% if contacts %}
+                        {% for contact in contacts %}
+                        <tr class="text-center hover:bg-gray-100">
+                            <td class="p-3 border">{{ contact.name }}</td>
+                            <td class="p-3 border">{{ contact.email }}</td>
+                            <td class="p-3 border">{{ contact.phone }}</td>
+                            <td class="p-3 border space-x-2">
+                                <a href="/edit/{{ contact._id }}" 
+                                   class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+                                   Edit
+                                </a>
+                                <a href="/delete/{{ contact._id }}" 
+                                   onclick="return confirm('Are you sure you want to delete this contact?')" 
+                                   class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                                   Delete
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="p-4 text-center text-gray-500">
+                                No contacts found.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+
+            <!-- Excel Download Button -->
+            <div class="mt-6 flex justify-end">
+                <a href="/export" 
+                   class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-teal-700">
+                   📥 Download Contacts
+                </a>
+            </div>
+        </div>
 
     </div>
-
 </div>
+
+<!-- JavaScript -->
+<script>
+function toggleGrid() {
+    const grid = document.getElementById("contactGrid");
+    grid.classList.toggle("hidden");
+}
+
+async function doSearch() {
+    const query = document.getElementById("searchInput").value;
+    const response = await fetch(`/?search=${encodeURIComponent(query)}`);
+    const html = await response.text();
+
+    // Extract table HTML from response
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+    const table = doc.querySelector("#contactGrid").innerHTML;
+
+    document.getElementById("contactGrid").innerHTML = table;
+    document.getElementById("contactGrid").classList.remove("hidden");
+}
+
+function refreshSearch() {
+    document.getElementById("searchInput").value = "";
+    doSearch(); // reload full contact list dynamically
+}
+
+// 🔑 Live search with debounce (waits 300ms after typing stops)
+let debounceTimer;
+document.getElementById("searchInput").addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        doSearch();
+    }, 300);
+});
+</script>
 
 </body>
 </html>
