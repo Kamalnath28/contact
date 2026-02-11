@@ -11,23 +11,71 @@
 
     <form method="POST" class="space-y-4">
 
+        <!-- Name -->
         <input type="text" name="name"
                value="{{ contact.name }}"
                pattern="[A-Za-z ]+"
                required
                class="w-full border p-2 rounded">
 
+        <!-- Email -->
         <input type="email" name="email"
                value="{{ contact.email }}"
                required
                class="w-full border p-2 rounded">
 
+        <!-- Phone -->
         <input type="text" name="phone"
                value="{{ contact.phone }}"
                pattern="[0-9]{10}"
                required
                class="w-full border p-2 rounded">
 
+        <!-- Gender Dropdown -->
+        <select name="gender"
+                class="w-full border p-2 rounded"
+                required>
+
+            <option value="Male"
+                {% if contact.gender == "Male" %}selected{% endif %}>
+                Male
+            </option>
+
+            <option value="Female"
+                {% if contact.gender == "Female" %}selected{% endif %}>
+                Female
+            </option>
+
+        </select>
+
+        <!-- City Dropdown -->
+        <select name="city"
+                class="w-full border p-2 rounded"
+                required>
+
+            <option value="Tiruchy"
+                {% if contact.city == "Tiruchy" %}selected{% endif %}>
+                Tiruchy
+            </option>
+
+            <option value="Tanjore"
+                {% if contact.city == "Tanjore" %}selected{% endif %}>
+                Tanjore
+            </option>
+
+            <option value="Salem"
+                {% if contact.city == "Salem" %}selected{% endif %}>
+                Salem
+            </option>
+
+            <option value="Coimbatore"
+                {% if contact.city == "Coimbatore" %}selected{% endif %}>
+                Coimbatore
+            </option>
+
+        </select>
+
+        <!-- Submit -->
         <button type="submit"
                 class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
             Update

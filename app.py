@@ -13,21 +13,32 @@ db = client["contact_app"]
 collection = db["contacts"]
 
 
-# ---------------- CONTACTS PAGE ----------------
+# ---------------- CONTACTS PAGE (SEARCH + FILTER) ----------------
 @app.route('/')
 def index():
     search_query = request.args.get('search')
+    gender_filter = request.args.get('gender')
+    city_filter = request.args.get('city')
 
+    query = {}
+
+    # Search logic
     if search_query:
-        contacts = list(collection.find({
-            "$or": [
-                {"name": {"$regex": search_query, "$options": "i"}},
-                {"email": {"$regex": search_query, "$options": "i"}},
-                {"phone": {"$regex": search_query, "$options": "i"}}
-            ]
-        }))
-    else:
-        contacts = list(collection.find())
+        query["$or"] = [
+            {"name": {"$regex": search_query, "$options": "i"}},
+            {"email": {"$regex": search_query, "$options": "i"}},
+            {"phone": {"$regex": search_query, "$options": "i"}}
+        ]
+
+    # Gender filter
+    if gender_filter and gender_filter != "All":
+        query["gender"] = gender_filter
+
+    # City filter
+    if city_filter and city_filter != "All":
+        query["city"] = city_filter
+
+    contacts = list(collection.find(query))
 
     return render_template("index.html", contacts=contacts)
 
@@ -39,7 +50,10 @@ def add_contact():
         name = request.form['name']
         email = request.form['email']
         phone = request.form['phone']
+        gender = request.form['gender']
+        city = request.form['city']
 
+        # Validation
         if not re.match("^[A-Za-z ]+$", name):
             return "Invalid Name"
 
@@ -52,11 +66,12 @@ def add_contact():
         collection.insert_one({
             "name": name,
             "email": email,
-            "phone": phone
+            "phone": phone,
+            "gender": gender,
+            "city": city
         })
 
         return redirect(url_for('index'))
-
 
     return render_template("add.html")
 
@@ -77,6 +92,8 @@ def edit_contact(id):
         name = request.form['name']
         email = request.form['email']
         phone = request.form['phone']
+        gender = request.form['gender']
+        city = request.form['city']
 
         if not re.match("^[A-Za-z ]+$", name):
             return "Invalid Name"
@@ -92,7 +109,9 @@ def edit_contact(id):
             {"$set": {
                 "name": name,
                 "email": email,
-                "phone": phone
+                "phone": phone,
+                "gender": gender,
+                "city": city
             }}
         )
 
@@ -110,15 +129,16 @@ def export_excel():
     sheet = workbook.active
     sheet.title = "Contacts"
 
-    # Header
-    sheet.append(["Name", "Email", "Phone"])
+    # Updated header
+    sheet.append(["Name", "Email", "Phone", "Gender", "City"])
 
-    # Data
     for contact in contacts:
         sheet.append([
             contact.get("name"),
             contact.get("email"),
-            contact.get("phone")
+            contact.get("phone"),
+            contact.get("gender"),
+            contact.get("city")
         ])
 
     file_stream = BytesIO()

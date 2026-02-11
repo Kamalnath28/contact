@@ -11,22 +11,46 @@
 
     <form method="POST" class="space-y-4">
 
+        <!-- Name -->
         <input type="text" name="name" placeholder="Name"
                pattern="[A-Za-z ]+"
                title="Only letters allowed"
                class="w-full border p-2 rounded"
                required>
 
+        <!-- Email -->
         <input type="email" name="email" placeholder="Email"
                class="w-full border p-2 rounded"
                required>
 
+        <!-- Phone -->
         <input type="text" name="phone" placeholder="Phone"
                pattern="[0-9]{10}"
                title="Enter 10 digit number"
                class="w-full border p-2 rounded"
                required>
 
+        <!-- Gender Dropdown -->
+        <select name="gender"
+                class="w-full border p-2 rounded"
+                required>
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+
+        <!-- City Dropdown -->
+        <select name="city"
+                class="w-full border p-2 rounded"
+                required>
+            <option value="">Select City</option>
+            <option value="Tiruchy">Tiruchy</option>
+            <option value="Tanjore">Tanjore</option>
+            <option value="Salem">Salem</option>
+            <option value="Coimbatore">Coimbatore</option>
+        </select>
+
+        <!-- Submit -->
         <button type="submit"
                 class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
             Add Contact
