@@ -1,147 +1,129 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Contact Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="bg-gray-100">
 
-<body class="bg-gray-100 flex">
+<!-- Navbar -->
+<nav class="bg-blue-900 text-white px-6 py-4 flex justify-between items-center shadow">
+    <h1 class="text-2xl font-bold">📇 Contact Management</h1>
+    <a href="/add" class="bg-green-500 px-4 py-2 rounded hover:bg-green-600">+ Add Contact</a>
+</nav>
 
-<!-- Sidebar -->
-<div class="w-64 bg-blue-900 text-white min-h-screen p-5">
-    <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
-    <ul class="space-y-4">
-        <li>
-            <a href="/" class="block hover:text-gray-300">
-                Contacts
-            </a>
-        </li>
-    </ul>
-</div>
+<div class="flex">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-md min-h-screen p-6">
+        <h2 class="text-lg font-semibold mb-4">Dashboard</h2>
+        <ul class="space-y-3 mb-6">
+            <li><a href="/" class="block text-gray-700 hover:text-blue-600">Contacts</a></li>
+            <!-- <li><a href="/export" class="block text-gray-700 hover:text-blue-600">Export to Excel</a></li> -->
+        </ul>
 
-<!-- Main Content -->
-<div class="flex-1 p-8">
-
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">Contact Management</h1>
-
-        <a href="/add"
-           class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-           + Add Contact
-        </a>
-    </div>
-
-    <div class="bg-white shadow-lg rounded-lg p-6">
-
-        <!-- Search + Filters -->
-        <div class="mb-4 flex flex-wrap gap-3">
-            <input type="text" id="searchInput"
-                   placeholder="Search by name, email or phone"
-                   class="border p-2 rounded">
-
-            <select id="genderFilter" class="border p-2 rounded">
-                <option value="All">All Genders</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-            </select>
-
-            <select id="cityFilter" class="border p-2 rounded">
-                <option value="All">All Cities</option>
-                <option value="Trichy">Trichy</option>
-                <option value="Tanjore">Tanjore</option>
-                <option value="Salem">Salem</option>
-                <option value="Coimbatore">Coimbatore</option>
-                <option value="Madurai">Madurai</option>
-                <option value="Chennai">Chennai</option>
-            </select>
-
-            <button onclick="refreshSearch()"
-                    class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
-                Refresh
-            </button>
+        <!-- Profile Section -->
+        <div class="bg-gray-100 rounded-lg p-4 shadow">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-blue-500 text-white flex items-center justify-center rounded-full font-bold">
+                    {{ user_initials }}
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-800">{{ user_name }}</p>
+                    <p class="text-sm text-gray-600">{{ user_email }}</p>
+                </div>
+            </div>
+            <div class="mt-4">
+                <a href="/profile" class="text-blue-600 hover:underline text-sm">View Profile</a>
+            </div>
         </div>
+    </aside>
 
-        <!-- Show Grid Button -->
-        <div class="mb-4 flex justify-end">
-            <button onclick="toggleGrid()" 
-                    class="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700">
-                📊 Show Grid
-            </button>
-        </div>
-
-        <!-- Table -->
-        <div id="contactGrid" class="hidden">
-            <table class="w-full border-collapse">
-                <thead>
-                    <tr class="bg-gray-200">
-                        <th class="p-3 border">Name</th>
-                        <th class="p-3 border">Email</th>
-                        <th class="p-3 border">Phone</th>
-                        <th class="p-3 border">Gender</th>
-                        <th class="p-3 border">City</th>
-                        <th class="p-3 border">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for contact in contacts %}
-                    <tr class="text-center hover:bg-gray-100">
-                        <td class="p-3 border">{{ contact.name }}</td>
-                        <td class="p-3 border">{{ contact.email }}</td>
-                        <td class="p-3 border">{{ contact.phone }}</td>
-                        <td class="p-3 border">{{ contact.gender }}</td>
-                        <td class="p-3 border">{{ contact.city }}</td>
-                        <td class="p-3 border space-x-2">
-                            <!-- Edit button -->
-                            <a href="/edit/{{ contact._id }}" 
-                               class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
-                               Edit
-                            </a>
-                            <!-- Delete button (AJAX) -->
-                            <button onclick="deleteContact('{{ contact._id }}')" 
-                                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
-                                Delete
-                            </button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-
-            <!-- Excel Download -->
-            <div class="mt-6 flex justify-end">
-                <a href="/export" 
-                   class="bg-gray-600 text-white px-6 py-2 rounded hover:bg-teal-700">
-                   📥 Download Contacts
-                </a>
+    <!-- Main Content -->
+    <main class="flex-1 p-8">
+        <!-- Filters -->
+        <div class="bg-white shadow rounded-lg p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-4">Search & Filters</h3>
+            <div class="flex flex-wrap gap-4">
+                <input type="text" id="searchInput" placeholder="Search by name, email or phone"
+                       class="border p-2 rounded flex-1">
+                <select id="genderFilter" class="border p-2 rounded">
+                    <option value="All">All Genders</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+                <select id="cityFilter" class="border p-2 rounded">
+                    <option value="All">All Cities</option>
+                    <option value="Trichy">Trichy</option>
+                    <option value="Tanjore">Tanjore</option>
+                    <option value="Salem">Salem</option>
+                    <option value="Coimbatore">Coimbatore</option>
+                    <option value="Madurai">Madurai</option>
+                    <option value="Chennai">Chennai</option>
+                </select>
+                <button onclick="refreshSearch()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                    Refresh
+                </button>
             </div>
         </div>
 
-    </div>
+        <!-- Contacts Table -->
+        <div class="bg-white shadow rounded-lg p-6">
+            <h3 class="text-lg font-semibold mb-4">Contacts List</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse text-sm">
+                    <thead>
+                        <tr class="bg-gray-200 text-left">
+                            <th class="p-3 border">Name</th>
+                            <th class="p-3 border">Email</th>
+                            <th class="p-3 border">Phone</th>
+                            <th class="p-3 border">Gender</th>
+                            <th class="p-3 border">City</th>
+                            <th class="p-3 border">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for contact in contacts %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="p-3 border">{{ contact.name }}</td>
+                            <td class="p-3 border">{{ contact.email }}</td>
+                            <td class="p-3 border">{{ contact.phone }}</td>
+                            <td class="p-3 border">{{ contact.gender }}</td>
+                            <td class="p-3 border">{{ contact.city }}</td>
+                            <td class="p-3 border space-x-2">
+                                <a href="/edit/{{ contact._id }}" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">Edit</a>
+                                <button onclick="deleteContact('{{ contact._id }}')" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Export Button BELOW the table -->
+            <div class="mt-6 flex justify-end">
+                <a href="/export" class="bg-teal-600 text-white px-6 py-2 rounded hover:bg-teal-700 shadow">
+                    📥 Export Contacts to Excel
+                </a>
+            </div>
+        </div>
+    </main>
 </div>
 
 <!-- JavaScript -->
 <script>
-function toggleGrid() {
-    document.getElementById("contactGrid").classList.toggle("hidden");
-}
-
 async function doSearch() {
     const search = document.getElementById("searchInput").value;
     const gender = document.getElementById("genderFilter").value;
     const city = document.getElementById("cityFilter").value;
 
-    const response = await fetch(
-        `/?search=${encodeURIComponent(search)}&gender=${gender}&city=${city}`
-    );
-
+    const response = await fetch(`/?search=${encodeURIComponent(search)}&gender=${gender}&city=${city}`);
     const html = await response.text();
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
-    const table = doc.querySelector("#contactGrid").innerHTML;
+    const table = doc.querySelector("tbody").innerHTML;
 
-    document.getElementById("contactGrid").innerHTML = table;
-    document.getElementById("contactGrid").classList.remove("hidden");
+    document.querySelector("tbody").innerHTML = table;
 }
 
 function refreshSearch() {
@@ -159,16 +141,14 @@ document.getElementById("searchInput").addEventListener("input", () => {
 document.getElementById("genderFilter").addEventListener("change", doSearch);
 document.getElementById("cityFilter").addEventListener("change", doSearch);
 
-// NEW: Delete contact via AJAX
 async function deleteContact(id) {
     if (!confirm("Are you sure you want to delete this contact?")) return;
-
     try {
         const response = await fetch(`/delete/${id}`, { method: "DELETE" });
         if (response.ok) {
             const result = await response.json();
             alert(result.message);
-            doSearch(); // refresh table
+            doSearch();
         } else {
             const error = await response.json();
             alert(error.error || "Delete failed.");
