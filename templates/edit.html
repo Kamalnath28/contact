@@ -9,7 +9,8 @@
 <div class="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6">
     <h2 class="text-xl font-bold mb-4">Edit Contact</h2>
 
-    <form method="POST" class="space-y-4">
+    <!-- Form with AJAX submission -->
+    <form id="editContactForm" data-id="{{ contact._id }}" class="space-y-4">
 
         <!-- Name -->
         <input type="text" name="name"
@@ -35,52 +36,20 @@
         <select name="gender"
                 class="w-full border p-2 rounded"
                 required>
-
-            <option value="Male"
-                {% if contact.gender == "Male" %}selected{% endif %}>
-                Male
-            </option>
-
-            <option value="Female"
-                {% if contact.gender == "Female" %}selected{% endif %}>
-                Female
-            </option>
-
+            <option value="Male" {% if contact.gender == "Male" %}selected{% endif %}>Male</option>
+            <option value="Female" {% if contact.gender == "Female" %}selected{% endif %}>Female</option>
         </select>
 
         <!-- City Dropdown -->
         <select name="city"
                 class="w-full border p-2 rounded"
                 required>
-
-            <option value="Trichy"
-                {% if contact.city == "Trichy" %}selected{% endif %}>
-                Trichy
-            </option>
-
-            <option value="Tanjore"
-                {% if contact.city == "Tanjore" %}selected{% endif %}>
-                Tanjore
-            </option>
-
-            <option value="Salem"
-                {% if contact.city == "Salem" %}selected{% endif %}>
-                Salem
-            </option>
-
-            <option value="Coimbatore"
-                {% if contact.city == "Coimbatore" %}selected{% endif %}>
-                Coimbatore
-            </option>
-            <option value="Madurai"
-                {% if contact.city == "Madurai" %}selected{% endif %}>
-                Madurai
-            </option>
-            <option value="Chennai"
-                {% if contact.city == "Chennai" %}selected{% endif %}>
-                Chennai
-            </option>
-
+            <option value="Trichy" {% if contact.city == "Trichy" %}selected{% endif %}>Trichy</option>
+            <option value="Tanjore" {% if contact.city == "Tanjore" %}selected{% endif %}>Tanjore</option>
+            <option value="Salem" {% if contact.city == "Salem" %}selected{% endif %}>Salem</option>
+            <option value="Coimbatore" {% if contact.city == "Coimbatore" %}selected{% endif %}>Coimbatore</option>
+            <option value="Madurai" {% if contact.city == "Madurai" %}selected{% endif %}>Madurai</option>
+            <option value="Chennai" {% if contact.city == "Chennai" %}selected{% endif %}>Chennai</option>
         </select>
 
         <!-- Submit -->
@@ -88,9 +57,36 @@
                 class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
             Update
         </button>
-
     </form>
 </div>
+
+<!-- JavaScript -->
+<script>
+document.getElementById("editContactForm").addEventListener("submit", async function(event) {
+    event.preventDefault(); // stop page reload
+
+    const id = this.dataset.id; // contact ID
+    const formData = new FormData(this);
+
+    try {
+        const response = await fetch(`/update/${id}`, {
+            method: "POST",
+            body: formData
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            alert(result.message);
+            window.location.href = "/"; // back to dashboard
+        } else {
+            const error = await response.json();
+            alert(error.error || "Update failed.");
+        }
+    } catch (err) {
+        alert("Network error: " + err.message);
+    }
+});
+</script>
 
 </body>
 </html>

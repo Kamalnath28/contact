@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, send_file
+from flask import Flask, render_template, request, redirect, url_for, send_file, jsonify
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import re
@@ -6,12 +6,12 @@ import openpyxl
 from io import BytesIO
 
 app = Flask(__name__)
+app.config["TEMPLATES_AUTO_RELOAD"] = True  # auto-reload templates
 
 # MongoDB Connection
 client = MongoClient("mongodb://localhost:27017/")
 db = client["contact_app"]
 collection = db["contacts"]
-
 
 # ---------------- CONTACTS PAGE (SEARCH + FILTER) ----------------
 @app.route('/')
@@ -39,9 +39,7 @@ def index():
         query["city"] = city_filter
 
     contacts = list(collection.find(query))
-
     return render_template("index.html", contacts=contacts)
-
 
 # ---------------- ADD ----------------
 @app.route('/add', methods=['GET', 'POST'])
@@ -56,10 +54,8 @@ def add_contact():
         # Validation
         if not re.match("^[A-Za-z ]+$", name):
             return "Invalid Name"
-
         if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
             return "Invalid Email"
-
         if not re.match("^[0-9]{10}$", phone):
             return "Phone must be 10 digits"
 
@@ -70,55 +66,52 @@ def add_contact():
             "gender": gender,
             "city": city
         })
-
         return redirect(url_for('index'))
 
     return render_template("add.html")
 
-
-# ---------------- DELETE ----------------
-@app.route('/delete/<id>')
+# ---------------- DELETE (AJAX style) ----------------
+@app.route('/delete/<id>', methods=['DELETE'])
 def delete_contact(id):
-    collection.delete_one({"_id": ObjectId(id)})
-    return redirect(url_for('index'))
+    result = collection.delete_one({"_id": ObjectId(id)})
+    if result.deleted_count > 0:
+        return jsonify({"message": "Contact deleted successfully"}), 200
+    return jsonify({"error": "Contact not found"}), 404
 
-
-# ---------------- EDIT ----------------
-@app.route('/edit/<id>', methods=['GET', 'POST'])
+# ---------------- EDIT PAGE ----------------
+@app.route('/edit/<id>', methods=['GET'])
 def edit_contact(id):
     contact = collection.find_one({"_id": ObjectId(id)})
-
-    if request.method == 'POST':
-        name = request.form['name']
-        email = request.form['email']
-        phone = request.form['phone']
-        gender = request.form['gender']
-        city = request.form['city']
-
-        if not re.match("^[A-Za-z ]+$", name):
-            return "Invalid Name"
-
-        if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-            return "Invalid Email"
-
-        if not re.match("^[0-9]{10}$", phone):
-            return "Phone must be 10 digits"
-
-        collection.update_one(
-            {"_id": ObjectId(id)},
-            {"$set": {
-                "name": name,
-                "email": email,
-                "phone": phone,
-                "gender": gender,
-                "city": city
-            }}
-        )
-
-        return redirect(url_for('index'))
-
     return render_template("edit.html", contact=contact)
 
+# ---------------- UPDATE (AJAX style) ----------------
+@app.route('/update/<id>', methods=['POST'])
+def update_contact(id):
+    name = request.form["name"]
+    email = request.form["email"]
+    phone = request.form["phone"]
+    gender = request.form["gender"]
+    city = request.form["city"]
+
+    # Validation
+    if not re.match("^[A-Za-z ]+$", name):
+        return jsonify({"error": "Invalid Name"}), 400
+    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+        return jsonify({"error": "Invalid Email"}), 400
+    if not re.match("^[0-9]{10}$", phone):
+        return jsonify({"error": "Phone must be 10 digits"}), 400
+
+    collection.update_one(
+        {"_id": ObjectId(id)},
+        {"$set": {
+            "name": name,
+            "email": email,
+            "phone": phone,
+            "gender": gender,
+            "city": city
+        }}
+    )
+    return jsonify({"message": "Contact updated successfully"}), 200
 
 # ---------------- EXPORT TO EXCEL ----------------
 @app.route('/export')
@@ -129,7 +122,6 @@ def export_excel():
     sheet = workbook.active
     sheet.title = "Contacts"
 
-    # Updated header
     sheet.append(["Name", "Email", "Phone", "Gender", "City"])
 
     for contact in contacts:
@@ -151,7 +143,6 @@ def export_excel():
         download_name="contacts.xlsx",
         mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-
 
 if __name__ == '__main__':
     app.run(debug=True)

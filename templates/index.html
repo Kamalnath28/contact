@@ -10,7 +10,6 @@
 <!-- Sidebar -->
 <div class="w-64 bg-blue-900 text-white min-h-screen p-5">
     <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
-
     <ul class="space-y-4">
         <li>
             <a href="/" class="block hover:text-gray-300">
@@ -37,20 +36,16 @@
 
         <!-- Search + Filters -->
         <div class="mb-4 flex flex-wrap gap-3">
-
-            <!-- Search -->
             <input type="text" id="searchInput"
                    placeholder="Search by name, email or phone"
                    class="border p-2 rounded">
 
-            <!-- Gender Filter -->
             <select id="genderFilter" class="border p-2 rounded">
                 <option value="All">All Genders</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
             </select>
 
-            <!-- City Filter -->
             <select id="cityFilter" class="border p-2 rounded">
                 <option value="All">All Cities</option>
                 <option value="Trichy">Trichy</option>
@@ -58,13 +53,13 @@
                 <option value="Salem">Salem</option>
                 <option value="Coimbatore">Coimbatore</option>
                 <option value="Madurai">Madurai</option>
+                <option value="Chennai">Chennai</option>
             </select>
 
             <button onclick="refreshSearch()"
                     class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
                 Refresh
             </button>
-
         </div>
 
         <!-- Show Grid Button -->
@@ -97,15 +92,16 @@
                         <td class="p-3 border">{{ contact.gender }}</td>
                         <td class="p-3 border">{{ contact.city }}</td>
                         <td class="p-3 border space-x-2">
+                            <!-- Edit button -->
                             <a href="/edit/{{ contact._id }}" 
                                class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
                                Edit
                             </a>
-                            <a href="/delete/{{ contact._id }}" 
-                               onclick="return confirm('Are you sure you want to delete this contact?')" 
-                               class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
-                               Delete
-                            </a>
+                            <!-- Delete button (AJAX) -->
+                            <button onclick="deleteContact('{{ contact._id }}')" 
+                                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                                Delete
+                            </button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -140,7 +136,6 @@ async function doSearch() {
     );
 
     const html = await response.text();
-
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, "text/html");
     const table = doc.querySelector("#contactGrid").innerHTML;
@@ -157,14 +152,31 @@ function refreshSearch() {
 }
 
 let debounceTimer;
-
 document.getElementById("searchInput").addEventListener("input", () => {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(doSearch, 300);
 });
-
 document.getElementById("genderFilter").addEventListener("change", doSearch);
 document.getElementById("cityFilter").addEventListener("change", doSearch);
+
+// NEW: Delete contact via AJAX
+async function deleteContact(id) {
+    if (!confirm("Are you sure you want to delete this contact?")) return;
+
+    try {
+        const response = await fetch(`/delete/${id}`, { method: "DELETE" });
+        if (response.ok) {
+            const result = await response.json();
+            alert(result.message);
+            doSearch(); // refresh table
+        } else {
+            const error = await response.json();
+            alert(error.error || "Delete failed.");
+        }
+    } catch (err) {
+        alert("Network error: " + err.message);
+    }
+}
 </script>
 
 </body>
