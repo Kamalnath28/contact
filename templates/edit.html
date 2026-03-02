@@ -53,9 +53,9 @@
                 class="w-full border p-2 rounded"
                 required>
 
-            <option value="Tiruchy"
-                {% if contact.city == "Tiruchy" %}selected{% endif %}>
-                Tiruchy
+            <option value="Trichy"
+                {% if contact.city == "Trichy" %}selected{% endif %}>
+                Trichy
             </option>
 
             <option value="Tanjore"
@@ -71,6 +71,14 @@
             <option value="Coimbatore"
                 {% if contact.city == "Coimbatore" %}selected{% endif %}>
                 Coimbatore
+            </option>
+            <option value="Madurai"
+                {% if contact.city == "Madurai" %}selected{% endif %}>
+                Madurai
+            </option>
+            <option value="Chennai"
+                {% if contact.city == "Chennai" %}selected{% endif %}>
+                Chennai
             </option>
 
         </select>
